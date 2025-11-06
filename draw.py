@@ -1,4 +1,5 @@
 import pygame
+import math
 
 # System important variables
 WINDOW_WIDTH = 500
@@ -14,6 +15,20 @@ class Vector2:
         self.x = x
         self.y = y
 
+    def getMagnitude(self) -> int:
+        magnitude : float = math.sqrt((self.x ** 2) + (self.y ** 2))
+        return magnitude
+
+    def setX(self, x):
+        self.x = x
+
+    def setY(self, y):
+        self.y = y
+
+    def setXY(self, x, y):
+        self.x = x
+        self.y = y
+
 # The player object for this game
 class Player:
     def __init__(self, x, y):
@@ -21,7 +36,7 @@ class Player:
         self.y = y
         self.velocity = Vector2(0, 0)
         self.rect = pygame.Rect(self.x, self.y, 50, 50)
-        self.friction = 0.9
+        self.friction = 0.8
 
     def update(self):
         if abs(self.velocity.x) > 0.1:
@@ -35,21 +50,17 @@ class Player:
             self.velocity.y = 0
 
         for collider in rect_colliders:
+            # Make the player bounce the opposite direction from the collider
             if pygame.sprite.collide_rect(self, collider) and collider != self.rect:
-                ########################
-                # WIP
-                colliderPos = Vector2(collider.x, collider.y)
-                colliderDir = Vector2(abs(colliderPos.x - self.x), abs(colliderPos.y - self.y))
-                ########################
-                self.velocity.x *= -1
-                self.velocity.y *= -1
+ ##               colliderDir = Vector2(self.velocity.x - collider.x, self.velocity.y - collider.y)
+ ##               bounceDir = Vector2(colliderDir.x / colliderDir.getMagnitude(), colliderDir.y / colliderDir.getMagnitude())
+
+                self.velocity.x = -(self.velocity.x + 50) * 0.8
+                self.velocity.y = -(self.velocity.y + 50) * 0.8
+                self.move()
 
         self.move()
 
-        self.x += self.velocity.x * delta_time
-        self.y += self.velocity.y * delta_time
-        self.rect.topleft = (self.x, self.y)
-        pygame.draw.rect(screen, (255, 255, 255), self.rect)
 
     def move(self):
         keys = pygame.key.get_pressed()
@@ -62,7 +73,12 @@ class Player:
         if keys[pygame.K_s]:
             self.velocity.y += 50
 
-        
+        self.x += self.velocity.x * delta_time
+        self.y += self.velocity.y * delta_time
+        self.rect.topleft = (self.x, self.y)
+        pygame.draw.rect(screen, (255, 255, 255), self.rect)
+
+
 class Wall:
     def __init__(self, x, y, width, height):
         self.x = x
