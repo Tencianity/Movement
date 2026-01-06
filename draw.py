@@ -2,8 +2,8 @@ import pygame
 import math
 
 # System important variables
-WINDOW_WIDTH = 500
-WINDOW_HEIGHT = 500
+WINDOW_WIDTH = 1080
+WINDOW_HEIGHT = 720
 FPS = 60
 clock = pygame.time.Clock()
 delta_time = 0.1
@@ -56,6 +56,7 @@ class Player:
             self.velocity.y = 0
 
         self.move()
+        self.displayVelocity()
 
 
     def move(self):
@@ -63,24 +64,26 @@ class Player:
         for collider in rect_colliders:
 
             # Make the player bounce the opposite direction from the collider
-            if pygame.sprite.collide_rect(self, collider) and collider != self.rect:
+            if pygame.sprite.collide_rect(self, collider) and collider is not self:
                 colliding = True
                 collisionDirection : Vector2 = getDirection((self.x, self.y), (collider.x, collider.y))
                 maskOverlap = self.mask.overlap(collider.mask, (collisionDirection.x, collisionDirection.y))
 
-                bounceDirection : Vector2 = getNormalizedDirection((self.getCenter()), maskOverlap)
-                self.velocity.x -= bounceDirection.x * 50
-                self.velocity.y -= bounceDirection.y * 50
+                screenOverlap = self.x + maskOverlap[0], self.y + maskOverlap[1]
+
+                bounceDirection : Vector2 = getNormalizedDirection((self.getCenter()), screenOverlap)
+                self.velocity.x = bounceDirection.x * -50
+                self.velocity.y = bounceDirection.y * -50
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a] and not colliding:
-            self.velocity.x -= 50
+            self.velocity.x -= 70
         if keys[pygame.K_d] and not colliding:
-            self.velocity.x += 50
+            self.velocity.x += 70
         if keys[pygame.K_w] and not colliding:
-            self.velocity.y -= 50
+            self.velocity.y -= 70
         if keys[pygame.K_s] and not colliding:
-            self.velocity.y += 50
+            self.velocity.y += 70
 
         self.x += self.velocity.x * delta_time
         self.y += self.velocity.y * delta_time
@@ -88,8 +91,24 @@ class Player:
         pygame.draw.rect(screen, (255, 255, 255), self.rect)
         screen.blit(self.maskSurface, self.rect)
 
+        # Prevent player from leaving screen
+        if self.x < 0:
+            self.x = 0
+        if self.x + self.rect.width > WINDOW_WIDTH:
+            self.x = WINDOW_WIDTH - self.rect.width
+        if self.y < 0:
+            self.y = 0
+        if self.y + self.rect.height > WINDOW_HEIGHT:
+            self.y = WINDOW_HEIGHT - self.rect.height
+
     def getCenter(self) -> tuple:
         return self.rect.center
+    
+    def displayVelocity(self):
+        text = f'Velocity: {(int) (self.velocity.x)}, {(int) (self.velocity.y)}'
+        font = pygame.font.Font('freesansbold.ttf', 36)
+        textSurface = font.render(text, True, (251, 255, 0))
+        screen.blit(textSurface, (10, 670))
 
 
 # A wall that blocks the player from moving past it
@@ -125,19 +144,23 @@ def getNormalizedDirection(obj1 : tuple, obj2 : tuple) -> Vector2:
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 running = True
-pygame.init
+pygame.init()
+pygame.font.init()
 
 objectList : list[object] = []
 playerList : list[Player] = []
 
 player1 = Player(0, 0)
 wall1 = Wall(100, 100, 250, 25)
+wall2 = Wall(300, 600, 30, 110)
 
 playerList.append(player1)
 objectList.append(wall1)
+objectList.append(wall2)
 
 rect_colliders.append(player1)
 rect_colliders.append(wall1)
+rect_colliders.append(wall2)
 
 # Runtime loop for the game
 while running:
@@ -148,7 +171,10 @@ while running:
 
     screen.fill((0, 0, 0))
 
-    wall1.spawn()
+    for obj in objectList:
+        if isinstance(obj, Wall):
+            obj.spawn()
+
     player1.update()
 
     pygame.display.flip()
