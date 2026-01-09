@@ -1,4 +1,4 @@
-import pygame
+import pygame # type: ignore
 import math
 
 '''
@@ -23,7 +23,7 @@ class Vector2:
         self.x = x
         self.y = y
 
-    def getMagnitude(self) -> int:
+    def getMagnitude(self) -> float:
         magnitude : float = math.sqrt((self.x ** 2) + (self.y ** 2))
         return magnitude
 
@@ -172,6 +172,9 @@ rect_colliders.append(wall2)
 
 # Runtime loop for the game
 while running:
+
+    if pygame.key.get_pressed()[pygame.K_ESCAPE]:
+        running = False
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
