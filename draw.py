@@ -1,6 +1,14 @@
 import pygame
 import math
 
+'''
+Must install following geeneral dependencies (FedoraLinux-43 Syntax):
+    sudo dnf install python3-devel
+    sudo dnf install SDL2-devel SDL2_image-devel SDL2_mixer-devel SDL2_ttf-devel
+    sudo dnf install python3-pip
+    pip install pygame-ce
+'''
+
 # System important variables
 WINDOW_WIDTH = 1080
 WINDOW_HEIGHT = 720
@@ -106,7 +114,7 @@ class Player:
     
     def displayVelocity(self):
         text = f'Velocity: {(int) (self.velocity.x)}, {(int) (self.velocity.y)}'
-        font = pygame.font.Font('freesansbold.ttf', 36)
+        font = pygame.font.SysFont('JetBrainsMono-Regular.ttf', 36)
         textSurface = font.render(text, True, (251, 255, 0))
         screen.blit(textSurface, (10, 670))
 
