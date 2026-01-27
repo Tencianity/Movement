@@ -1,5 +1,6 @@
 import pygame # type: ignore
 import math
+import random
 
 '''
 Must install following geeneral dependencies (FedoraLinux-43 Syntax):
@@ -16,6 +17,7 @@ FPS = 60
 clock = pygame.time.Clock()
 delta_time = 0.1
 rect_colliders = []
+player_points = 0
 
 # A 2D vector class
 class Vector2:
@@ -65,6 +67,7 @@ class Player:
 
         self.move()
         self.displayVelocity()
+        self.displayPoints()
 
 
     def move(self):
@@ -114,9 +117,15 @@ class Player:
     
     def displayVelocity(self):
         text = f'Velocity: {(int) (self.velocity.x)}, {(int) (self.velocity.y)}'
-        font = pygame.font.SysFont('JetBrainsMono-Regular.ttf', 36)
+        font = pygame.font.SysFont('JetBrainsMono-Regular', 36)
         textSurface = font.render(text, True, (251, 255, 0))
         screen.blit(textSurface, (10, 670))
+
+    def displayPoints(self):
+        text = f'Points: {player_points}'
+        font = pygame.font.SysFont('JetBrainsMono-Regular', 30)
+        textSurface = font.render(text, True, (251, 255, 0))
+        screen.blit(textSurface, (980, 5))
 
 
 # A wall that blocks the player from moving past it
@@ -148,6 +157,25 @@ def getNormalizedDirection(obj1 : tuple, obj2 : tuple) -> Vector2:
     normalizedDirection = Vector2(direction.x / direction.getMagnitude(), direction.y / direction.getMagnitude())
     return normalizedDirection
 
+
+class Apple:
+    def __init__(self, x, y, points=1):
+        self.x = x
+        self.y = y
+        self.points = points
+        self.rect = pygame.Rect(self.x, self.y, 25, 25)
+
+    def spawn(self):
+        pygame.draw.rect(screen, (0, 200, 0), self.rect)
+
+        for collider in rect_colliders:
+            if pygame.sprite.collide_rect(self, collider) and collider is not self:
+                if isinstance(collider, Player):
+                    global player_points
+                    player_points += self.points
+                self.rect.topleft = (random.randint(0, 1030), random.randint(0, 680))
+
+
 # Game initialization
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
@@ -161,10 +189,12 @@ playerList : list[Player] = []
 player1 = Player(0, 0)
 wall1 = Wall(100, 100, 250, 25)
 wall2 = Wall(300, 600, 30, 110)
+apple = Apple(100, 100, 1)
 
 playerList.append(player1)
 objectList.append(wall1)
 objectList.append(wall2)
+objectList.append(apple)
 
 rect_colliders.append(player1)
 rect_colliders.append(wall1)
@@ -183,7 +213,7 @@ while running:
     screen.fill((0, 0, 0))
 
     for obj in objectList:
-        if isinstance(obj, Wall):
+        if isinstance(obj, Wall) or isinstance(obj, Apple):
             obj.spawn()
 
     player1.update()
