@@ -38,6 +38,11 @@ class Vector2:
     def setXY(self, x, y):
         self.x = x
         self.y = y
+    
+    def getDistance(v1 : Vector2, v2 : Vector2) -> int:
+        a = abs(v1.x - v2.x)
+        b = abs(v1.y - v2.y)
+        return int( math.sqrt(a**2 + b**2) )
 
 # The player object for this game
 class Player:
@@ -164,16 +169,33 @@ class Apple:
         self.y = y
         self.points = points
         self.rect = pygame.Rect(self.x, self.y, 25, 25)
+        check_near_player = False
 
     def spawn(self):
         pygame.draw.rect(screen, (0, 200, 0), self.rect)
 
         for collider in rect_colliders:
             if pygame.sprite.collide_rect(self, collider) and collider is not self:
-                if isinstance(collider, Player):
-                    global player_points
-                    player_points += self.points
-                self.rect.topleft = (random.randint(0, 1030), random.randint(0, 680))
+                self.moveApple(collider, 100)
+
+    # Move the Apple to a new location on the screen
+    def moveApple(self, collider, dst_frm_player):
+        if isinstance(collider, Player):
+            global player_points
+            player_points += self.points
+                
+        check_near_player = True
+
+        # Make sure the Apple doesn't spawn within 100 pixels of the player
+        while check_near_player:
+            check_near_player = False
+                
+            newXY = Vector2(random.randint(0, 1030), random.randint(0, 680))
+            if Vector2.getDistance(newXY, Vector2(collider.x, collider.y)) <= dst_frm_player:
+                check_near_player = True
+                continue
+            self.rect.topleft = (newXY.x, newXY.y)
+
 
 
 # Game initialization
