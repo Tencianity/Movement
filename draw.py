@@ -122,13 +122,13 @@ class Player:
     
     def displayVelocity(self):
         text = f'Velocity: {(int) (self.velocity.x)}, {(int) (self.velocity.y)}'
-        font = pygame.font.SysFont('JetBrainsMono-Regular', 36)
+        font = pygame.font.SysFont('Arial', 36)
         textSurface = font.render(text, True, (251, 255, 0))
         screen.blit(textSurface, (10, 670))
 
     def displayPoints(self):
         text = f'Points: {player_points}'
-        font = pygame.font.SysFont('JetBrainsMono-Regular', 30)
+        font = pygame.font.SysFont('Arial', 30)
         textSurface = font.render(text, True, (251, 255, 0))
         screen.blit(textSurface, (980, 5))
 
@@ -161,6 +161,7 @@ def getNormalizedDirection(obj1 : tuple, obj2 : tuple) -> Vector2:
     direction = Vector2(obj2[0] - obj1[0], obj2[1] - obj1[1])
     normalizedDirection = Vector2(direction.x / direction.getMagnitude(), direction.y / direction.getMagnitude())
     return normalizedDirection
+
 
 
 class Apple:
